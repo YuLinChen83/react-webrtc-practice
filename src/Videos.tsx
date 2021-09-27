@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   collection,
   doc,
@@ -11,8 +11,9 @@ import {
 } from "firebase/firestore";
 import { db } from "./firebase";
 import { ReactComponent as HangupIcon } from "./icons/hangup.svg";
-import { ReactComponent as MoreIcon } from "./icons/more-vertical.svg";
 import { ReactComponent as CopyIcon } from "./icons/copy.svg";
+import { Button, Video } from "./components";
+import clsx from "clsx";
 
 // Initialize WebRTC
 const servers = {
@@ -25,6 +26,15 @@ const servers = {
 };
 
 const pc = new RTCPeerConnection(servers);
+
+const getLocalStream = async () =>
+  await navigator.mediaDevices.getUserMedia({
+    video: {
+      width: 200,
+      height: 120,
+    },
+    audio: true,
+  });
 
 interface VideosProps {
   mode: string;
@@ -40,13 +50,7 @@ function Videos({ mode, callId, setPage }: VideosProps) {
 
   // 1. Setup media sources
   const setupSources = async () => {
-    const localStream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        width: 200,
-        height: 120,
-      },
-      audio: true,
-    });
+    const localStream = await getLocalStream();
     const remoteStream = new MediaStream();
 
     // Push tracks from local stream to peer connection
@@ -65,15 +69,15 @@ function Videos({ mode, callId, setPage }: VideosProps) {
     localRef.current.srcObject = localStream;
     remoteRef.current.srcObject = remoteStream;
 
-    setWebcamActive(true);
-
     pc.onconnectionstatechange = (event) => {
       if (pc.connectionState === "disconnected") {
-        console.log("disconnected");
-
         hangUp();
       }
     };
+  };
+
+  const connect = async () => {
+    setWebcamActive(true);
 
     if (mode === "create") {
       // 2. Create an offer
@@ -179,41 +183,69 @@ function Videos({ mode, callId, setPage }: VideosProps) {
     window.location.reload();
   };
 
+  const copyCode = () => {
+    navigator.clipboard.writeText(roomId);
+  };
+
+  useEffect(() => {
+    setupSources();
+
+    return () => {
+      hangUp();
+    };
+  }, []);
+
   return (
-    <div>
-      <video ref={localRef} autoPlay playsInline muted />
-      <video ref={remoteRef} autoPlay playsInline />
-
-      <div>
-        <button onClick={hangUp} disabled={!webcamActive} aria-label="hangup">
-          Hangup
-          <HangupIcon />
-        </button>
-        <div tabIndex={0} role="button">
-          <MoreIcon />
-          <div>
-            <button
-              onClick={() => {
-                navigator.clipboard.writeText(roomId);
-              }}
-            >
-              <CopyIcon />
-              Copy joining code
-            </button>
-          </div>
-        </div>
-      </div>
-
+    <div className="mt-8 w-full">
       {!webcamActive && (
         <div>
           <div>
-            <h3>Turn on your camera and microphone and start the call</h3>
-            <div>
-              <button onClick={() => setPage("home")}>Cancel</button>
-              <button onClick={setupSources}>Start</button>
+            <h3 className="mb-8">
+              Turn on your camera and microphone and start the call
+            </h3>
+            <h4 className="text-center">Ready to join?</h4>
+            <div className="flex justify-between my-4 flex-col sm:flex-row">
+              <Button variant="outlined" onClick={() => setPage("home")}>
+                Back
+              </Button>
+              <Button
+                variant="contained"
+                onClick={connect}
+                className="mt-2 sm:mt-0"
+              >
+                Start
+              </Button>
             </div>
           </div>
         </div>
+      )}
+
+      <div className="mb-8 flex justify-items-center flex-wrap">
+        <Video ref={localRef} muted />
+        <Video
+          ref={remoteRef}
+          className={clsx("ml-0 sm:ml-3 mt-3 sm:mt-0", !roomId && "sr-only")}
+          muted
+        />
+      </div>
+
+      {roomId && webcamActive && (
+        <>
+          <div className="flex justify-center items-center flex-col sm:flex-row">
+            <Button variant="outlined" onClick={hangUp}>
+              <HangupIcon className="w-6 h-6 mr-3" />
+              Hang up
+            </Button>
+            <Button
+              variant="contained"
+              className="ml-0 sm:ml-3 mt-2 sm:mt-0"
+              onClick={copyCode}
+            >
+              <CopyIcon className="w-6 h-6 mr-3" />
+              Copy joining code
+            </Button>
+          </div>
+        </>
       )}
     </div>
   );

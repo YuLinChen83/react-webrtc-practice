@@ -1,5 +1,7 @@
 # WebRTC Practice
-From 1-to-1 to many-to-many video chat webpage built with WebRTC, React and Firestore.
+[Demo](https://react-webrtc-practice.vercel.app/)  / [Note]()  
+
+1-to-1 video chat webpage built with WebRTC, React and Firestore.
 
 ## Available Commands
 * `npm install`
@@ -9,6 +11,7 @@ From 1-to-1 to many-to-many video chat webpage built with WebRTC, React and Fire
 * React 7.0.0
 * Typescript 4.3.2
 * Firebase 9.0.2
+* Tailwindcss 2.2.15
 * Vite 2.5.4
 
 ## References
