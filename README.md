@@ -1,5 +1,5 @@
 # WebRTC Practice
-[Demo](https://react-webrtc-practice.vercel.app/)  / [Note]()  
+[Demo](https://react-webrtc-practice.vercel.app/)  / [Note](https://yulinchen83.github.io/tiffany-gatsby-blog/blog/20210930)  
 
 1-to-1 video chat webpage built with WebRTC, React and Firestore.
 
@@ -13,6 +13,9 @@
 * Firebase 9.0.2
 * Tailwindcss 2.2.15
 * Vite 2.5.4
+
+## How to use
+![](./src/demo.gif) ![](./src/demo2.gif)
 
 ## References
 * [Build a video chat application from scratch in 10 minutes | With WebRTC, Firebase, and React.](https://youtu.be/_3EWXcD7BDw)
